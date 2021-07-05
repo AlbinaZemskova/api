@@ -1,0 +1,39 @@
+version: "3.7"
+services:
+  node:
+    image: "node:12-alpine"
+    user: "node"
+    working_dir: /home/node/app
+    environment:
+      - MYSQL_CONNECTION_LIMIT
+      - MYSQL_DATABASE
+      - MYSQL_PASSWORD
+      - MYSQL_HOST=db
+      - MYSQL_USER
+      - MYSQL_PORT=3306
+    volumes:
+      - ./:/home/node/app
+    ports:
+      - "${PORT}:5000"
+    restart: "always"
+    depends_on:
+      - db
+    command: "node index.js"
+  db:
+    image: "mysql:5.7.27"
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    environment:
+      - MYSQL_HOST
+      - MYSQL_ROOT_PASSWORD
+      - MYSQL_DATABASE
+      - MYSQL_USER
+      - MYSQL_PASSWORD
+    volumes:
+      - ./mysql-dump.sql:/docker-entrypoint-initdb.d/mysql-dump.sql
+      - ./db-data:/var/lib/mysql
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - "${ADMINER_PORT}:8080"
